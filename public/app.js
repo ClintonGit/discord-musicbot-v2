@@ -10,6 +10,9 @@ let autocompleteResults = [];
 let recentlyPlayed = [];
 let isSeekDragging = false;
 let currentDynColorUrl = null;
+let localProgressMs = 0;
+let localProgressSyncAt = 0;
+let localProgressTimer = null;
 
 const socket = io();
 
@@ -123,6 +126,8 @@ function renderQueue(data) {
     if (eqBars) eqBars.classList.toggle('paused', !!paused);
     updateDynamicTheme(currentTrack.thumbnail);
     setVinylSpin(!paused);
+    if (!paused) startLocalProgressTick();
+    else stopLocalProgressTick();
   } else {
     npEmpty.style.display = 'flex';
     npContent.style.display = 'none';
@@ -130,6 +135,7 @@ function renderQueue(data) {
     setArtBg(null);
     applyDynamicColor(null);
     clearVinylSpin();
+    stopLocalProgressTick();
     currentDynColorUrl = null;
   }
 
@@ -265,12 +271,13 @@ function updatePauseBtn(paused) {
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
     if (eqBars) eqBars.classList.add('paused');
     setVinylSpin(false);
+    stopLocalProgressTick();
   } else {
     btn.title = 'Pause';
     btn.onclick = () => sendControl('pause');
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
     if (eqBars) eqBars.classList.remove('paused');
-    if (currentTrackData) setVinylSpin(true);
+    if (currentTrackData) { setVinylSpin(true); startLocalProgressTick(); }
   }
 }
 
@@ -694,6 +701,7 @@ socket.on('track:start', track => {
   document.getElementById('eqBars')?.classList.remove('paused');
   updateDynamicTheme(track.thumbnail);
   setVinylSpin(true);
+  startLocalProgressTick();
   if (document.getElementById('tabSuggest')?.classList.contains('active')) {
     clearTimeout(suggestDebounce);
     suggestDebounce = setTimeout(() => refreshSuggestions(track), 1500);
@@ -712,6 +720,36 @@ function setProgress(pct, current, total) {
   if (fill) fill.style.width = (pct || 0) + '%';
   if (curr) curr.textContent = current || '0:00';
   if (tot && total) tot.textContent = total;
+
+  // Sync local interpolator
+  const durMs = durationToMs(currentTrackData?.duration);
+  if (durMs > 0) {
+    localProgressMs = ((pct || 0) / 100) * durMs;
+    localProgressSyncAt = Date.now();
+  }
+}
+
+function startLocalProgressTick() {
+  clearInterval(localProgressTimer);
+  localProgressTimer = setInterval(() => {
+    if (isSeekDragging || isPaused || !currentTrackData) return;
+    const durMs = durationToMs(currentTrackData.duration);
+    if (!durMs || !localProgressSyncAt) return;
+    const elapsed = Date.now() - localProgressSyncAt;
+    const currentMs = Math.min(localProgressMs + elapsed, durMs);
+    const pct = (currentMs / durMs) * 100;
+    const fill = document.getElementById('npProgressFill');
+    const curr = document.getElementById('npCurrent');
+    if (fill) fill.style.width = pct + '%';
+    if (curr) curr.textContent = msToTime(currentMs);
+  }, 500);
+}
+
+function stopLocalProgressTick() {
+  clearInterval(localProgressTimer);
+  localProgressTimer = null;
+  localProgressMs = 0;
+  localProgressSyncAt = 0;
 }
 
 /* ── Dynamic Color Extraction ── */
@@ -758,8 +796,8 @@ function applyDynamicColor(color) {
   const bar = document.querySelector('.player-bar');
   if (!color) {
     root.style.setProperty('--dyn-color', '#3B82F6');
-    root.style.setProperty('--dyn-glow', 'rgba(59,130,246,0.45)');
-    root.style.setProperty('--dyn-glow-soft', 'rgba(59,130,246,0.15)');
+    root.style.setProperty('--dyn-glow', 'rgba(59,130,246,0.35)');
+    root.style.setProperty('--dyn-glow-soft', 'rgba(59,130,246,0.10)');
     if (bar) bar.style.boxShadow = '';
     return;
   }
