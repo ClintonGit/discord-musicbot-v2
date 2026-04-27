@@ -1,7 +1,8 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { Player } = require('discord-player');
-const { DefaultExtractors } = require('@discord-player/extractor');
+const { DefaultExtractors, SpotifyExtractor } = require('@discord-player/extractor');
+const { YoutubeiExtractor } = require('discord-player-youtubei');
 const fs = require('fs');
 const path = require('path');
 const { setPlayer, setClient } = require('./web/state');
@@ -21,6 +22,21 @@ setPlayer(player);
 setClient(client);
 
 (async () => {
+  // YouTube (ผ่าน YouTubei — ไม่ต้องการ token)
+  await player.extractors.register(YoutubeiExtractor, {});
+
+  // Spotify (ต้องการ CLIENT_ID + SECRET)
+  if (process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET) {
+    await player.extractors.register(SpotifyExtractor, {
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+    });
+    console.log('🟢 Spotify extractor โหลดแล้วค่ะ');
+  } else {
+    console.warn('⚠️  SPOTIFY_CLIENT_ID/SECRET ไม่ได้ตั้งค่า — Spotify ลิงก์จะไม่ทำงานค่ะ');
+  }
+
+  // SoundCloud + อื่นๆ (ไม่ต้อง token)
   await player.extractors.loadMulti(DefaultExtractors);
   console.log('🎵 Extractors โหลดแล้วค่ะ');
 })();
