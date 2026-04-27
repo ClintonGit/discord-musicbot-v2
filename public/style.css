@@ -28,8 +28,8 @@
 
   /* Dynamic color — updated via JS when track changes */
   --dyn-color:      #3B82F6;
-  --dyn-glow:       rgba(59,130,246,0.45);
-  --dyn-glow-soft:  rgba(59,130,246,0.15);
+  --dyn-glow:       rgba(59,130,246,0.35);
+  --dyn-glow-soft:  rgba(59,130,246,0.10);
 }
 
 html, body { height: 100%; }
@@ -459,7 +459,7 @@ body {
 .pb-seekfill {
   height: 100%; width: 0%;
   background: var(--dyn-color);
-  box-shadow: 0 0 12px var(--dyn-glow), 0 0 30px var(--dyn-glow-soft);
+  box-shadow: 0 0 6px var(--dyn-glow);
   transition: width 0.9s linear, background 1.5s ease, box-shadow 1.5s ease;
   position: relative; border-radius: 0 2px 2px 0;
 }
@@ -512,7 +512,7 @@ body {
 .pb-art-wrap.spinning .pb-art {
   border-radius: 50%;
   animation: vinyl-spin 10s linear infinite;
-  box-shadow: 0 0 24px var(--dyn-glow), 0 0 60px var(--dyn-glow-soft), 0 4px 20px rgba(0,0,0,.7);
+  box-shadow: 0 0 14px var(--dyn-glow), 0 4px 16px rgba(0,0,0,.6);
 }
 .pb-art-wrap.spinning.paused .pb-art {
   animation-play-state: paused;

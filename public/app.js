@@ -765,9 +765,9 @@ function applyDynamicColor(color) {
   }
   const { r, g, b } = color;
   root.style.setProperty('--dyn-color', `rgb(${r},${g},${b})`);
-  root.style.setProperty('--dyn-glow', `rgba(${r},${g},${b},0.5)`);
-  root.style.setProperty('--dyn-glow-soft', `rgba(${r},${g},${b},0.18)`);
-  if (bar) bar.style.boxShadow = `0 -8px 40px rgba(${r},${g},${b},0.12), 0 -2px 0 rgba(${r},${g},${b},0.3)`;
+  root.style.setProperty('--dyn-glow', `rgba(${r},${g},${b},0.35)`);
+  root.style.setProperty('--dyn-glow-soft', `rgba(${r},${g},${b},0.10)`);
+  if (bar) bar.style.boxShadow = `0 -6px 24px rgba(${r},${g},${b},0.08), 0 -1px 0 rgba(${r},${g},${b},0.2)`;
 }
 
 async function updateDynamicTheme(thumbnailUrl) {
