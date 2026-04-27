@@ -1,0 +1,129 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1e1f22;
+  --surface: #2b2d31;
+  --surface2: #313338;
+  --border: #3f4147;
+  --text: #dbdee1;
+  --muted: #80848e;
+  --accent: #5865f2;
+  --accent-hover: #4752c4;
+  --green: #23a55a;
+  --red: #f23f42;
+  --yellow: #f0b232;
+}
+
+body { font-family: 'gg sans', 'Noto Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Login Page ── */
+.login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.login-card { background: var(--surface); padding: 48px 40px; border-radius: 8px; text-align: center; max-width: 400px; width: 90%; }
+.login-card h1 { font-size: 24px; margin-bottom: 8px; }
+.login-card p { color: var(--muted); margin-bottom: 28px; font-size: 14px; }
+.btn-discord { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: #fff; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 15px; transition: background .15s; }
+.btn-discord:hover { background: var(--accent-hover); }
+.btn-discord svg { width: 22px; height: 22px; fill: #fff; }
+
+/* ── App Layout ── */
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
+.sidebar-header h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.guild-list { flex: 1; overflow-y: auto; padding: 8px; }
+.guild-item { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 4px; cursor: pointer; transition: background .1s; }
+.guild-item:hover { background: var(--surface2); }
+.guild-item.active { background: var(--accent); }
+.guild-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: var(--border); }
+.guild-item span { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-footer { padding: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; }
+.user-info { flex: 1; min-width: 0; }
+.user-info .name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.logout-btn { font-size: 11px; color: var(--muted); text-decoration: none; }
+.logout-btn:hover { color: var(--red); }
+
+/* ── Main ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.topbar h1 { font-size: 16px; font-weight: 700; }
+.online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-left: auto; }
+.online-dot.offline { background: var(--muted); }
+
+.content { flex: 1; display: grid; grid-template-columns: 360px 1fr; overflow: hidden; }
+
+/* ── Now Playing ── */
+.now-playing-panel { padding: 20px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+.now-playing-card { background: var(--surface); border-radius: 8px; overflow: hidden; }
+.np-art { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--border); display: block; }
+.np-info { padding: 16px; }
+.np-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.np-author { font-size: 13px; color: var(--muted); }
+.np-duration { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.np-empty { padding: 32px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* ── Controls ── */
+.controls { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px 16px; }
+.ctrl-btn { background: none; border: none; color: var(--text); cursor: pointer; padding: 8px; border-radius: 50%; transition: background .1s, color .1s; display: flex; align-items: center; justify-content: center; }
+.ctrl-btn:hover { background: var(--surface2); }
+.ctrl-btn.danger:hover { color: var(--red); }
+.ctrl-btn svg { width: 20px; height: 20px; }
+.volume-row { display: flex; align-items: center; gap: 10px; padding: 0 16px 16px; }
+.volume-row svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+input[type=range] { flex: 1; accent-color: var(--accent); height: 4px; }
+.volume-label { font-size: 12px; color: var(--muted); width: 28px; text-align: right; }
+
+/* ── Search ── */
+.search-form { display: flex; gap: 8px; }
+.search-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 9px 12px; color: var(--text); font-size: 14px; outline: none; }
+.search-input:focus { border-color: var(--accent); }
+.search-btn { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 9px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; white-space: nowrap; }
+.search-btn:hover { background: var(--accent-hover); }
+.search-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Queue Panel ── */
+.queue-panel { display: flex; flex-direction: column; overflow: hidden; }
+.queue-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.queue-header h2 { font-size: 14px; font-weight: 700; }
+.queue-count { font-size: 12px; color: var(--muted); background: var(--surface); padding: 2px 8px; border-radius: 10px; }
+.queue-list { flex: 1; overflow-y: auto; padding: 8px; }
+.queue-empty { padding: 40px; text-align: center; color: var(--muted); font-size: 14px; }
+.queue-item { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 4px; background: var(--surface); margin-bottom: 4px; cursor: grab; transition: background .1s; }
+.queue-item:hover { background: var(--surface2); }
+.queue-item.sortable-ghost { opacity: .4; }
+.queue-item.sortable-drag { box-shadow: 0 4px 16px #0006; cursor: grabbing; }
+.queue-pos { font-size: 12px; color: var(--muted); width: 20px; text-align: center; flex-shrink: 0; }
+.queue-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; background: var(--border); flex-shrink: 0; }
+.queue-meta { flex: 1; min-width: 0; }
+.queue-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queue-author { font-size: 12px; color: var(--muted); }
+.queue-dur { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.queue-remove { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.queue-remove:hover { color: var(--red); background: #f23f4220; }
+.drag-handle { color: var(--muted); flex-shrink: 0; cursor: grab; }
+
+/* ── No Guild ── */
+.no-guild { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-size: 15px; }
+
+/* ── Tabs ── */
+.tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--border); }
+.tab { padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab.active { color: var(--text); border-color: var(--accent); }
+.tab-panel { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.tab-panel.active { display: flex; }
+
+/* ── History ── */
+.history-list { flex: 1; overflow-y: auto; padding: 8px; }
+.history-item { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 4px; margin-bottom: 4px; }
+.history-item:hover { background: var(--surface); }
+.history-thumb { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; background: var(--border); flex-shrink: 0; }
+.history-meta { flex: 1; min-width: 0; }
+.history-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-info { font-size: 12px; color: var(--muted); }
+
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .guild-item span, .user-info, .sidebar-header h2 { display: none; }
+  .content { grid-template-columns: 1fr; }
+  .now-playing-panel { display: none; }
+}

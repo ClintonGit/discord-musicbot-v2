@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MusicBot Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Servers</h2>
+      </div>
+      <div class="guild-list" id="guildList"></div>
+      <div class="sidebar-footer">
+        <img class="user-avatar" id="userAvatar" src="" alt="avatar" />
+        <div class="user-info">
+          <div class="name" id="userName"></div>
+          <a class="logout-btn" href="/auth/logout">ออกจากระบบ</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main" id="mainContent">
+      <div class="no-guild" id="noGuild">← เลือก server ก่อนนะคะ</div>
+
+      <div id="guildContent" style="display:none; flex:1; flex-direction:column; overflow:hidden; display:none;">
+        <div class="topbar">
+          <h1 id="guildName">—</h1>
+          <div class="online-dot offline" id="onlineDot" title="Bot status"></div>
+        </div>
+
+        <div class="content">
+          <!-- Left: Now Playing + Controls + Search -->
+          <div class="now-playing-panel">
+            <div class="now-playing-card">
+              <div id="npEmpty" class="np-empty">ยังไม่มีเพลงกำลังเล่นค่ะ 🎵</div>
+              <div id="npContent" style="display:none">
+                <img class="np-art" id="npArt" src="" alt="album art" />
+                <div class="np-info">
+                  <div class="np-title" id="npTitle">—</div>
+                  <div class="np-author" id="npAuthor">—</div>
+                  <div class="np-duration" id="npDuration">—</div>
+                </div>
+              </div>
+              <!-- Controls -->
+              <div class="controls" id="controls">
+                <button class="ctrl-btn" id="btnPause" title="Pause/Resume" onclick="sendControl('pause')">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <button class="ctrl-btn" id="btnSkip" title="Skip" onclick="sendControl('skip')">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6L23 18V6l-8.5 6z"/></svg>
+                </button>
+                <button class="ctrl-btn danger" title="Stop" onclick="sendControl('stop')">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                </button>
+              </div>
+              <!-- Volume -->
+              <div class="volume-row">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="onVolumeChange(this.value)" />
+                <span class="volume-label" id="volumeLabel">80</span>
+              </div>
+            </div>
+
+            <!-- Search -->
+            <div>
+              <form class="search-form" onsubmit="addTrack(event)">
+                <input class="search-input" id="searchInput" type="text" placeholder="ชื่อเพลง หรือ URL..." autocomplete="off" />
+                <button class="search-btn" id="searchBtn" type="submit">+ Add</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right: Queue + History -->
+          <div class="queue-panel">
+            <div class="tabs">
+              <div class="tab active" onclick="switchTab('queue')">Queue</div>
+              <div class="tab" onclick="switchTab('history')">History</div>
+            </div>
+
+            <!-- Queue Tab -->
+            <div class="tab-panel active" id="tabQueue">
+              <div class="queue-header">
+                <h2>รายการเพลง</h2>
+                <span class="queue-count" id="queueCount">0 เพลง</span>
+              </div>
+              <div class="queue-list" id="queueList">
+                <div class="queue-empty">Queue ว่างอยู่ค่ะ เพิ่มเพลงได้เลย!</div>
+              </div>
+            </div>
+
+            <!-- History Tab -->
+            <div class="tab-panel" id="tabHistory">
+              <div class="queue-header">
+                <h2>ประวัติ</h2>
+              </div>
+              <div class="history-list" id="historyList">
+                <div class="queue-empty">ยังไม่มีประวัติค่ะ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,18 +1,29 @@
 {
   "name": "discord-musicbot",
   "version": "1.0.0",
-  "description": "Discord Music Bot powered by discord-player v7",
+  "description": "Discord Music Bot with Web Dashboard",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "deploy": "node deploy-commands.js"
+    "deploy": "node deploy-commands.js",
+    "db:migrate": "npx prisma migrate dev",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio"
   },
   "dependencies": {
     "@discord-player/extractor": "^7.2.0",
+    "@prisma/client": "^6.0.0",
+    "axios": "^1.7.0",
     "discord-player": "^7.1.0",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.0",
-    "ffmpeg-static": "^5.2.0"
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "ffmpeg-static": "^5.2.0",
+    "socket.io": "^4.7.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0"
   }
 }
