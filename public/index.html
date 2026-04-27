@@ -4,15 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MusicBot Dashboard</title>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=3.0" />
 </head>
 <body>
   <div class="app">
+
     <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>Servers</h2>
+      <div class="sidebar-brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <span>MusicBot</span>
+        <span class="ver-badge">v3.0</span>
       </div>
+      <div class="sidebar-section-label">SERVERS</div>
       <div class="guild-list" id="guildList"></div>
       <div class="sidebar-footer">
         <img class="user-avatar" id="userAvatar" src="" alt="avatar" />
@@ -23,93 +29,213 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="main" id="mainContent">
-      <div class="no-guild" id="noGuild">← เลือก server ก่อนนะคะ</div>
+    <!-- Content Wrapper -->
+    <div class="content-wrap">
 
-      <div id="guildContent" style="display:none; flex:1; flex-direction:column; overflow:hidden; display:none;">
-        <div class="topbar">
-          <h1 id="guildName">—</h1>
-          <div class="online-dot offline" id="onlineDot" title="Bot status"></div>
+      <!-- Ambient art background -->
+      <div class="art-bg" id="artBg"></div>
+
+      <!-- Main area -->
+      <main class="main" id="mainContent">
+
+        <!-- No guild selected -->
+        <div class="no-guild" id="noGuild">
+          <div class="no-guild-inner">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity:.15"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            <p>← เลือก server ก่อน</p>
+          </div>
         </div>
 
-        <div class="content">
-          <!-- Left: Now Playing + Controls + Search -->
-          <div class="now-playing-panel">
-            <div class="now-playing-card">
-              <div id="npEmpty" class="np-empty">ยังไม่มีเพลงกำลังเล่นค่ะ 🎵</div>
-              <div id="npContent" style="display:none">
-                <img class="np-art" id="npArt" src="" alt="album art" />
-                <div class="np-info">
-                  <div class="np-title" id="npTitle">—</div>
-                  <div class="np-author" id="npAuthor">—</div>
-                  <div class="np-duration" id="npDuration">—</div>
-                </div>
-              </div>
-              <!-- Controls -->
-              <div class="controls" id="controls">
-                <button class="ctrl-btn" id="btnPause" title="Pause/Resume" onclick="sendControl('pause')">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                </button>
-                <button class="ctrl-btn" id="btnSkip" title="Skip" onclick="sendControl('skip')">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6L23 18V6l-8.5 6z"/></svg>
-                </button>
-                <button class="ctrl-btn danger" title="Stop" onclick="sendControl('stop')">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
-                </button>
-              </div>
-              <!-- Volume -->
-              <div class="volume-row">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="onVolumeChange(this.value)" />
-                <span class="volume-label" id="volumeLabel">80</span>
-              </div>
-            </div>
+        <!-- Guild content -->
+        <div id="guildContent" style="display:none">
 
-            <!-- Search -->
-            <div>
-              <form class="search-form" onsubmit="addTrack(event)">
-                <input class="search-input" id="searchInput" type="text" placeholder="ชื่อเพลง หรือ URL..." autocomplete="off" />
-                <button class="search-btn" id="searchBtn" type="submit">+ Add</button>
-              </form>
+          <!-- Topbar -->
+          <div class="topbar">
+            <div class="topbar-left">
+              <div class="online-dot offline" id="onlineDot"></div>
+              <h1 id="guildName">—</h1>
             </div>
           </div>
 
-          <!-- Right: Queue + History -->
+          <!-- Search section -->
+          <div class="search-section">
+            <div class="search-form-wrap">
+              <div class="search-input-wrap">
+                <form class="search-form" onsubmit="addTrack(event)">
+                  <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                  <input class="search-input" id="searchInput" type="text"
+                    placeholder="ชื่อเพลง, YouTube หรือ Spotify URL..." autocomplete="off" />
+                  <button class="search-btn" id="searchBtn" type="submit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    เพิ่ม
+                  </button>
+                </form>
+                <div id="searchAutocomplete" class="autocomplete-dropdown"></div>
+              </div>
+              <div id="playlistNotice" class="playlist-notice"></div>
+            </div>
+          </div>
+
+          <!-- Queue Panel (full width) -->
           <div class="queue-panel">
             <div class="tabs">
               <div class="tab active" onclick="switchTab('queue')">Queue</div>
+              <div class="tab" onclick="switchTab('suggest')">แนะนำ</div>
+              <div class="tab" onclick="switchTab('playlists')">Playlists</div>
               <div class="tab" onclick="switchTab('history')">History</div>
+              <div class="tab tab-icon" onclick="switchTab('settings')" title="ตั้งค่า">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+              </div>
             </div>
 
             <!-- Queue Tab -->
             <div class="tab-panel active" id="tabQueue">
               <div class="queue-header">
                 <h2>รายการเพลง</h2>
-                <span class="queue-count" id="queueCount">0 เพลง</span>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="queue-count" id="queueCount">0 เพลง</span>
+                  <button class="icon-btn danger" id="btnClearQueue" onclick="clearQueue()" title="ล้างคิวทั้งหมด">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    ล้างคิว
+                  </button>
+                  <button class="icon-btn" id="btnSavePlaylist" onclick="saveQueueAsPlaylist()" title="บันทึกเป็น Playlist">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                    บันทึก
+                  </button>
+                </div>
               </div>
               <div class="queue-list" id="queueList">
-                <div class="queue-empty">Queue ว่างอยู่ค่ะ เพิ่มเพลงได้เลย!</div>
+                <div class="queue-empty">Queue ว่างอยู่ เพิ่มเพลงได้เลย</div>
+              </div>
+            </div>
+
+            <!-- Suggest Tab -->
+            <div class="tab-panel" id="tabSuggest">
+              <div class="queue-header">
+                <h2>เพลงแนะนำ</h2>
+                <span class="queue-count" id="suggestLabel">—</span>
+              </div>
+              <div class="queue-list" id="suggestList">
+                <div class="queue-empty">เล่นเพลงก่อน แล้วระบบจะหาเพลงใกล้เคียงให้ 🎵</div>
+              </div>
+            </div>
+
+            <!-- Playlists Tab -->
+            <div class="tab-panel" id="tabPlaylists">
+              <div class="queue-header">
+                <h2>Playlists</h2>
+                <span class="queue-count" id="playlistCount">0</span>
+              </div>
+              <div class="playlist-list" id="playlistList">
+                <div class="queue-empty">ยังไม่มี playlist บันทึกจาก Queue ได้เลย</div>
               </div>
             </div>
 
             <!-- History Tab -->
             <div class="tab-panel" id="tabHistory">
-              <div class="queue-header">
-                <h2>ประวัติ</h2>
-              </div>
+              <div class="queue-header"><h2>ประวัติ</h2></div>
               <div class="history-list" id="historyList">
-                <div class="queue-empty">ยังไม่มีประวัติค่ะ</div>
+                <div class="queue-empty">ยังไม่มีประวัติ</div>
               </div>
             </div>
-          </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-panel" id="tabSettings">
+              <div class="queue-header"><h2>ตั้งค่า Server</h2></div>
+              <div class="settings-body">
+                <div class="settings-group">
+                  <label class="settings-label">
+                    <span>ช่องแจ้งเตือนเพลง</span>
+                    <span class="settings-hint">Bot จะส่ง Now Playing ไปที่ช่องนี้</span>
+                  </label>
+                  <select class="settings-select" id="notifyChannelSelect">
+                    <option value="">— ปิดการแจ้งเตือน —</option>
+                  </select>
+                  <button class="settings-save-btn" onclick="saveConfig()">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                    บันทึกการตั้งค่า
+                  </button>
+                  <div id="configNotice" class="config-notice"></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /queue-panel -->
+        </div><!-- /guildContent -->
+      </main>
+
+      <!-- ══════════════════════════════
+           BOTTOM PLAYER BAR
+           ══════════════════════════════ -->
+      <div class="player-bar">
+        <!-- Seekbar -->
+        <div class="pb-seekbar" id="progressBar">
+          <div class="pb-seekfill" id="npProgressFill"></div>
         </div>
-      </div>
-    </main>
-  </div>
+
+        <!-- Bar content -->
+        <div class="pb-inner">
+
+          <!-- Left: Track info -->
+          <div class="pb-left">
+            <div class="pb-track" id="npContent" style="display:none">
+              <div class="pb-art-wrap">
+                <img class="pb-art" id="npArt" src="" alt="" />
+                <div class="eq-bars" id="eqBars">
+                  <span class="bar b1"></span>
+                  <span class="bar b2"></span>
+                  <span class="bar b3"></span>
+                  <span class="bar b4"></span>
+                </div>
+              </div>
+              <div class="pb-info">
+                <div class="pb-title" id="npTitle">—</div>
+                <div class="pb-author" id="npAuthor">—</div>
+              </div>
+            </div>
+            <div class="pb-empty" id="npEmpty">ยังไม่มีเพลงกำลังเล่น</div>
+          </div>
+
+          <!-- Center: Controls + time -->
+          <div class="pb-center">
+            <div class="pb-controls">
+              <button class="pb-btn" onclick="sendControl('prev')" title="ย้อนกลับ">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+              </button>
+              <button class="pb-btn pb-btn-main" id="btnPause" title="Pause/Resume" onclick="sendControl('pause')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              </button>
+              <button class="pb-btn" onclick="sendControl('skip')" title="ถัดไป">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6L23 18V6l-8.5 6z"/></svg>
+              </button>
+              <button class="pb-btn pb-btn-danger" onclick="sendControl('stop')" title="หยุด">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+              </button>
+            </div>
+            <div class="pb-time">
+              <span id="npCurrent">0:00</span>
+              <span class="pb-time-sep"> / </span>
+              <span id="npTotal">—</span>
+            </div>
+          </div>
+
+          <!-- Right: Volume -->
+          <div class="pb-right">
+            <div class="pb-volume">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+              <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="onVolumeChange(this.value)" />
+              <span class="volume-label" id="volumeLabel">80</span>
+            </div>
+          </div>
+
+        </div><!-- /pb-inner -->
+      </div><!-- /player-bar -->
+
+    </div><!-- /content-wrap -->
+  </div><!-- /app -->
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
-  <script src="/app.js"></script>
+  <script src="/app.js?v=3.0"></script>
 </body>
 </html>
