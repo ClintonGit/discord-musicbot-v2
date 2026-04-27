@@ -7,7 +7,7 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "deploy": "node deploy-commands.js",
-    "db:migrate": "npx prisma migrate dev",
+    "db:push": "npx prisma db push",
     "db:generate": "npx prisma generate",
     "db:studio": "npx prisma studio"
   },
@@ -21,6 +21,7 @@
     "express": "^4.21.0",
     "express-session": "^1.18.0",
     "ffmpeg-static": "^5.2.0",
+    "pg": "^8.20.0",
     "socket.io": "^4.7.0"
   },
   "devDependencies": {
