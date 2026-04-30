@@ -10,8 +10,6 @@ console.warn = (...a) => {
 const { Client, GatewayIntentBits, Collection, ChannelType, ActivityType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { Player, onBeforeCreateStream, useQueue } = require('discord-player');
 const { PassThrough } = require('stream');
-const { spawn } = require('child_process');
-const ffmpegPath = require('ffmpeg-static');
 const { DefaultExtractors, SpotifyExtractor } = require('@discord-player/extractor');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
 const ytdlExec = require('youtube-dl-exec');
@@ -63,37 +61,24 @@ onBeforeCreateStream(async (track) => {
     return null; // SoundCloud etc. → use default extractor
   }
 
-  const ytdlpProc = ytdlExec.exec(streamUrl, {
+  const cookiesFile = path.join(__dirname, 'cookies.txt');
+  const proc = ytdlExec.exec(streamUrl, {
     output: '-',
     format: 'bestaudio[acodec=opus][protocol=https]/bestaudio[ext=webm][protocol=https]/bestaudio[protocol=https]/bestaudio',
     noWarnings: true,
     bufferSize: '1M',
     retries: 3,
     socketTimeout: 10,
-    // Use cookies.txt if available — fixes YouTube throttling on server IPs
-    ...(fs.existsSync(path.join(__dirname, 'cookies.txt')) && { cookies: path.join(__dirname, 'cookies.txt') }),
+    // cookies.txt fixes YouTube throttling/bot-detection on VPS IPs
+    ...(fs.existsSync(cookiesFile) && { cookies: cookiesFile }),
   });
-  if (!ytdlpProc.stdout) return null;
-  ytdlpProc.stderr?.resume();
+  if (!proc.stdout) return null;
+  proc.stderr?.resume();
 
-  // Pre-convert WebM/Opus → s16le PCM via our own ffmpeg BEFORE discord-player's pipeline.
-  // discord-player uses -analyzeduration 0 on piped streams, which prevents ffmpeg from probing
-  // the WebM container header → causes audio artifacts/buzzing. By pre-converting to raw PCM here,
-  // discord-player's ffmpeg receives format-agnostic s16le and can process it cleanly.
-  const ffmpegProc = spawn(ffmpegPath, [
-    '-i', 'pipe:0',
-    '-ar', '48000',
-    '-ac', '2',
-    '-f', 's16le',
-    '-loglevel', 'error',
-    'pipe:1',
-  ], { stdio: ['pipe', 'pipe', 'ignore'] });
-
-  ytdlpProc.stdout.pipe(ffmpegProc.stdin);
-  ytdlpProc.stdout.on('error', () => ffmpegProc.stdin.destroy());
-  ffmpegProc.stdin.on('error', () => {});
-
-  return ffmpegProc.stdout;
+  const buffered = new PassThrough({ highWaterMark: 512 * 1024 });
+  proc.stdout.pipe(buffered);
+  proc.stdout.on('error', (err) => buffered.destroy(err));
+  return buffered;
 });
 
 (async () => {
