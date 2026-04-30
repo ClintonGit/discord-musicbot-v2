@@ -9,6 +9,7 @@ console.warn = (...a) => {
 
 const { Client, GatewayIntentBits, Collection, ChannelType, ActivityType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { Player, onBeforeCreateStream, useQueue } = require('discord-player');
+const { PassThrough } = require('stream');
 const { DefaultExtractors, SpotifyExtractor } = require('@discord-player/extractor');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
 const ytdlExec = require('youtube-dl-exec');
@@ -62,12 +63,22 @@ onBeforeCreateStream(async (track) => {
 
   const proc = ytdlExec.exec(streamUrl, {
     output: '-',
-    format: 'bestaudio[ext=webm]/bestaudio/best',
+    // Prefer Opus/WebM via progressive HTTPS (avoid DASH segments that cause stuttering)
+    format: 'bestaudio[acodec=opus][protocol=https]/bestaudio[ext=webm][protocol=https]/bestaudio[protocol=https]/bestaudio',
     noWarnings: true,
+    bufferSize: '1M',      // 1MB yt-dlp internal buffer
+    httpChunkSize: '10M',  // download 10MB at a time — smoother on slow networks
+    retries: 3,
+    socketTimeout: 10,
   });
   if (!proc.stdout) return null;
   proc.stderr?.resume();
-  return proc.stdout;
+
+  // Pipe through a 1MB PassThrough buffer so minor network hiccups don't cause audible gaps
+  const buffered = new PassThrough({ highWaterMark: 1024 * 1024 });
+  proc.stdout.pipe(buffered);
+  proc.stdout.on('error', (err) => { buffered.destroy(err); });
+  return buffered;
 });
 
 (async () => {
