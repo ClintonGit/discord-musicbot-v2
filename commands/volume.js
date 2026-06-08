@@ -17,11 +17,11 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue?.isPlaying()) {
-      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่ค่ะ', flags: 64 });
+      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่', flags: 64 });
     }
 
     const level = interaction.options.getInteger('level');
     queue.node.setVolume(level);
-    await interaction.reply(`🔊 ปรับเสียงเป็น **${level}%** แล้วค่ะ`);
+    await interaction.reply(`🔊 ปรับเสียงเป็น **${level}%** แล้ว`);
   },
 };

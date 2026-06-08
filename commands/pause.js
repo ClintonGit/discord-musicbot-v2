@@ -10,10 +10,10 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue?.isPlaying()) {
-      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่ค่ะ', flags: 64 });
+      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่', flags: 64 });
     }
 
     queue.node.pause();
-    await interaction.reply('⏸️ หยุดชั่วคราวแล้วค่ะ พิมพ์ /resume เพื่อเล่นต่อนะคะ');
+    await interaction.reply('⏸️ หยุดชั่วคราวแล้ว พิมพ์ /resume เพื่อเล่นต่อ');
   },
 };

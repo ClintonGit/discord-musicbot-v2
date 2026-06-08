@@ -10,7 +10,7 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue || queue.tracks.size === 0) {
-      return interaction.reply({ content: '📋 Queue ว่างเปล่าอยู่ค่ะ', flags: 64 });
+      return interaction.reply({ content: '📋 Queue ว่างเปล่าอยู่', flags: 64 });
     }
 
     const current = queue.currentTrack;

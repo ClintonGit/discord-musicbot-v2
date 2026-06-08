@@ -10,7 +10,7 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue?.currentTrack) {
-      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่ค่ะ', flags: 64 });
+      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่', flags: 64 });
     }
 
     const track = queue.currentTrack;
@@ -18,7 +18,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setColor(0x9b59b6)
-      .setTitle('🎵 กำลังเล่นอยู่ค่ะ')
+      .setTitle('🎵 กำลังเล่นอยู่')
       .setDescription(`**[${track.title}](${track.url})**\n\n${progress}`)
       .addFields(
         { name: '👤 ศิลปิน', value: track.author, inline: true },

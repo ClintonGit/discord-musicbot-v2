@@ -28,12 +28,12 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue?.isPlaying()) {
-      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่ค่ะ', flags: 64 });
+      return interaction.reply({ content: '❌ ไม่มีเพลงกำลังเล่นอยู่', flags: 64 });
     }
 
     const key = interaction.options.getString('mode');
     const { mode, label } = MODES[key];
     queue.setRepeatMode(mode);
-    await interaction.reply(`${label} แล้วค่ะ บอส~`);
+    await interaction.reply(`${label} แล้ว`);
   },
 };

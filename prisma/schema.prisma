@@ -8,13 +8,15 @@ datasource db {
 }
 
 model Guild {
-  id         String        @id
-  name       String
-  iconUrl    String?
-  queueItems QueueItem[]
-  history    PlayHistory[]
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id                String        @id
+  name              String
+  iconUrl           String?
+  notifyChannelId   String?
+  queueItems        QueueItem[]
+  history           PlayHistory[]
+  playlists         Playlist[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
 
 model QueueItem {
@@ -44,4 +46,30 @@ model PlayHistory {
   playedAt DateTime @default(now())
 
   @@index([guildId, playedAt(sort: Desc)])
+}
+
+model Playlist {
+  id        String          @id @default(cuid())
+  guildId   String
+  guild     Guild           @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  name      String
+  createdBy String
+  createdAt DateTime        @default(now())
+  tracks    PlaylistTrack[]
+
+  @@index([guildId])
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  position   Int
+  title      String
+  url        String
+  duration   String
+  thumbnail  String   @default("")
+  author     String
+
+  @@index([playlistId, position])
 }

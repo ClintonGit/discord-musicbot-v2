@@ -1,24 +1,37 @@
 const { Router } = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
 
 const router = Router();
 
 const DISCORD_API = 'https://discord.com/api/v10';
 const SCOPES = 'identify guilds';
+const AXIOS_TIMEOUT = 5000;
 
 router.get('/login', (req, res) => {
+  const state = crypto.randomBytes(32).toString('hex');
+  req.session.oauthState = state;
+
   const params = new URLSearchParams({
     client_id: process.env.CLIENT_ID,
     redirect_uri: process.env.REDIRECT_URI,
     response_type: 'code',
     scope: SCOPES,
+    state,
   });
   res.redirect(`${DISCORD_API}/oauth2/authorize?${params}`);
 });
 
 router.get('/callback', async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
+
   if (!code) return res.redirect('/auth/login');
+
+  // CSRF state validation
+  if (!state || state !== req.session.oauthState) {
+    return res.status(403).send('Invalid state — possible CSRF attack');
+  }
+  delete req.session.oauthState;
 
   try {
     const tokenRes = await axios.post(
@@ -30,17 +43,26 @@ router.get('/callback', async (req, res) => {
         code,
         redirect_uri: process.env.REDIRECT_URI,
       }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: AXIOS_TIMEOUT,
+      }
     );
 
     const { access_token } = tokenRes.data;
+    if (!access_token) {
+      console.error('OAuth: no access_token in response');
+      return res.redirect('/auth/login');
+    }
 
     const [userRes, guildsRes] = await Promise.all([
       axios.get(`${DISCORD_API}/users/@me`, {
         headers: { Authorization: `Bearer ${access_token}` },
+        timeout: AXIOS_TIMEOUT,
       }),
       axios.get(`${DISCORD_API}/users/@me/guilds`, {
         headers: { Authorization: `Bearer ${access_token}` },
+        timeout: AXIOS_TIMEOUT,
       }),
     ]);
 
@@ -55,7 +77,7 @@ router.get('/callback', async (req, res) => {
 
     res.redirect('/');
   } catch (err) {
-    console.error('OAuth error:', err.response?.data ?? err.message);
+    console.error('OAuth callback failed:', err.code ?? err.message);
     res.redirect('/auth/login');
   }
 });

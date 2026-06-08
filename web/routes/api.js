@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { useQueue } = require('discord-player');
+const { useQueue, QueryType } = require('discord-player');
 const rateLimit = require('express-rate-limit');
 const prisma = require('../db');
 const { getPlayer, getClient } = require('../state');
@@ -92,7 +92,7 @@ router.post('/guilds/:id/queue', requireAuth, requireGuildMember, async (req, re
     // Spotify playlist / album / artist — search then bulk-add
     const isSpotifyMulti = /spotify\.com\/(playlist|album|artist)\//.test(query);
     if (isSpotifyMulti) {
-      const results = await player.search(query, { requestedBy: null });
+      const results = await player.search(query, { requestedBy: null, searchEngine: QueryType.AUTO });
       if (!results.hasTracks()) return res.status(404).json({ error: 'Playlist not found' });
 
       let queue = player.nodes.get(guild.id);
@@ -111,7 +111,7 @@ router.post('/guilds/:id/queue', requireAuth, requireGuildMember, async (req, re
 
     // Play now — clear upcoming queue, add track at front, skip current
     if (position === 'now') {
-      const results = await player.search(query, { requestedBy: null });
+      const results = await player.search(query, { requestedBy: null, searchEngine: QueryType.AUTO });
       if (!results.hasTracks()) return res.status(404).json({ error: 'Track not found' });
 
       let queue = player.nodes.get(guild.id);
@@ -129,7 +129,7 @@ router.post('/guilds/:id/queue', requireAuth, requireGuildMember, async (req, re
 
     // Play next — insert at front of upcoming queue
     if (position === 'next') {
-      const results = await player.search(query, { requestedBy: null });
+      const results = await player.search(query, { requestedBy: null, searchEngine: QueryType.AUTO });
       if (!results.hasTracks()) return res.status(404).json({ error: 'Track not found' });
 
       let queue = player.nodes.get(guild.id);

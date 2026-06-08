@@ -23,7 +23,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
       { body: commands },
     );
 
-    console.log('✅ Deploy commands สำเร็จแล้วค่ะ!');
+    console.log('✅ Deploy commands สำเร็จแล้ว!');
   } catch (error) {
     console.error('❌ Deploy commands ล้มเหลว:', error);
   }

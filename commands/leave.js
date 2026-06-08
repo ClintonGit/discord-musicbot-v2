@@ -11,6 +11,6 @@ module.exports = {
 
     if (queue) queue.delete();
 
-    await interaction.reply('👋 ออกจาก voice channel แล้วค่ะ บอส~');
+    await interaction.reply('👋 ออกจาก voice channel แล้ว');
   },
 };

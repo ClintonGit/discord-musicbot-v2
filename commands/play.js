@@ -13,7 +13,7 @@ module.exports = {
   async execute(interaction, player) {
     const voiceChannel = interaction.member?.voice?.channel;
     if (!voiceChannel) {
-      return interaction.reply({ content: '❌ เข้า voice channel ก่อนนะคะ บอส!', flags: 64 });
+      return interaction.reply({ content: '❌ เข้า voice channel ก่อนนะ', flags: 64 });
     }
 
     const query = interaction.options.getString('query');
@@ -34,7 +34,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setColor(0x9b59b6)
-      .setTitle('🎵 เพิ่ม Queue แล้วค่ะ')
+      .setTitle('🎵 เพิ่ม Queue แล้ว')
       .setDescription(`**[${track.title}](${track.url})**`)
       .addFields(
         { name: '👤 ศิลปิน', value: track.author, inline: true },

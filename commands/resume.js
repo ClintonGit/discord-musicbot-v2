@@ -10,14 +10,14 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue) {
-      return interaction.reply({ content: '❌ ไม่มี queue อยู่ค่ะ', flags: 64 });
+      return interaction.reply({ content: '❌ ไม่มี queue อยู่', flags: 64 });
     }
 
     if (!queue.node.isPaused()) {
-      return interaction.reply({ content: '▶️ เพลงกำลังเล่นอยู่แล้วค่ะ', flags: 64 });
+      return interaction.reply({ content: '▶️ เพลงกำลังเล่นอยู่แล้ว', flags: 64 });
     }
 
     queue.node.resume();
-    await interaction.reply('▶️ เล่นต่อแล้วค่ะ บอส~');
+    await interaction.reply('▶️ เล่นต่อแล้ว');
   },
 };

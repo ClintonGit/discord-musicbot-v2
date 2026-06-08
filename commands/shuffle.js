@@ -10,10 +10,10 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
 
     if (!queue || queue.tracks.size < 2) {
-      return interaction.reply({ content: '❌ ต้องมีเพลงใน queue อย่างน้อย 2 เพลงค่ะ', flags: 64 });
+      return interaction.reply({ content: '❌ ต้องมีเพลงใน queue อย่างน้อย 2 เพลง', flags: 64 });
     }
 
     queue.tracks.shuffle();
-    await interaction.reply(`🔀 สุ่ม queue แล้วค่ะ! มีเพลงทั้งหมด ${queue.tracks.size} เพลงค่ะ`);
+    await interaction.reply(`🔀 สุ่ม queue แล้ว มีเพลงทั้งหมด ${queue.tracks.size} เพลง`);
   },
 };

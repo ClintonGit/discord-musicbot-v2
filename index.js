@@ -8,11 +8,9 @@ console.warn = (...a) => {
 };
 
 const { Client, GatewayIntentBits, Collection, ChannelType, ActivityType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
-const { Player, onBeforeCreateStream, useQueue } = require('discord-player');
-const { PassThrough } = require('stream');
+const { Player, useQueue } = require('discord-player');
 const { DefaultExtractors, SpotifyExtractor } = require('@discord-player/extractor');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
-const ytdlExec = require('youtube-dl-exec');
 const fs = require('fs');
 const path = require('path');
 const { setPlayer, setClient } = require('./web/state');
@@ -34,56 +32,25 @@ const player = new Player(client);
 setPlayer(player);
 setClient(client);
 
-// Override streaming with yt-dlp for YouTube and Spotify tracks
-onBeforeCreateStream(async (track) => {
-  let streamUrl = track.url;
-
-  if (/youtube\.com|youtu\.be/i.test(streamUrl)) {
-    // YouTube → stream directly
-  } else if (/spotify\.com/i.test(streamUrl) || track.source === 'spotify') {
-    // Spotify → find YouTube equivalent, update thumbnail to YouTube's
-    try {
-      const result = await ytdlExec(`ytsearch1:${track.title} ${track.author}`, {
-        dumpSingleJson: true,
-        noWarnings: true,
-        flatPlaylist: true,
-      });
-      const entry = result.entries?.[0] ?? result;
-      if (!entry?.id) return null;
-      streamUrl = `https://www.youtube.com/watch?v=${entry.id}`;
-      // replace Spotify thumbnail with YouTube thumbnail
-      track.thumbnail = `https://i.ytimg.com/vi/${entry.id}/mqdefault.jpg`;
-    } catch (err) {
-      console.error('[stream] Spotify search failed:', err.message);
-      return null;
-    }
-  } else {
-    return null; // SoundCloud etc. → use default extractor
-  }
-
-  const cookiesFile = path.join(__dirname, 'cookies.txt');
-  const proc = ytdlExec.exec(streamUrl, {
-    output: '-',
-    format: 'bestaudio[acodec=opus][protocol=https]/bestaudio[ext=webm][protocol=https]/bestaudio[protocol=https]/bestaudio',
-    noWarnings: true,
-    bufferSize: '1M',
-    retries: 3,
-    socketTimeout: 10,
-    // cookies.txt fixes YouTube throttling/bot-detection on VPS IPs
-    ...(fs.existsSync(cookiesFile) && { cookies: cookiesFile }),
-  });
-  if (!proc.stdout) return null;
-  proc.stderr?.resume();
-
-  const buffered = new PassThrough({ highWaterMark: 512 * 1024 });
-  proc.stdout.pipe(buffered);
-  proc.stdout.on('error', (err) => buffered.destroy(err));
-  return buffered;
-});
 
 (async () => {
-  // YouTube metadata/search ยังคงผ่าน YoutubeiExtractor (streaming ถูก override ด้วย yt-dlp)
-  await player.extractors.register(YoutubeiExtractor, {});
+  const cookiesFile = path.join(__dirname, 'cookies.txt');
+  let youtubeCookie = '';
+  if (fs.existsSync(cookiesFile)) {
+    const lines = fs.readFileSync(cookiesFile, 'utf8').split('\n');
+    youtubeCookie = lines
+      .filter(l => !l.startsWith('#') && l.trim())
+      .map(l => l.split('\t'))
+      .filter(p => p.length >= 7 && p[0].includes('youtube.com'))
+      .map(p => `${p[5]}=${p[6]}`)
+      .join('; ');
+  }
+
+  await player.extractors.register(YoutubeiExtractor, {
+    cookie: youtubeCookie || undefined,
+    generateWithPoToken: !!youtubeCookie,
+  });
+  console.log(`🍪 YoutubeiExtractor: cookie=${!!youtubeCookie} poToken=${!!youtubeCookie}`);
 
   // Spotify (ต้องการ CLIENT_ID + SECRET)
   if (process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET) {
