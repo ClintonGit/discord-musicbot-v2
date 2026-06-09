@@ -8,14 +8,35 @@ console.warn = (...a) => {
 };
 
 const { Client, GatewayIntentBits, Collection, ChannelType, ActivityType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
-const { Player, useQueue } = require('discord-player');
+const { Player, useQueue, onBeforeCreateStream } = require('discord-player');
 const { DefaultExtractors, SpotifyExtractor } = require('@discord-player/extractor');
 const { YoutubeiExtractor } = require('discord-player-youtubei');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { setPlayer, setClient } = require('./web/state');
 const { startWebServer } = require('./web/server');
 const prisma = require('./web/db');
+
+// [ytdlp-stream] Global hook — applies to ALL queues (slash commands + web dashboard)
+const YTDLP_BIN = process.env.YOUTUBE_DL_PATH || '/usr/local/bin/yt-dlp';
+const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
+const HAS_COOKIES = fs.existsSync(COOKIES_PATH);
+
+onBeforeCreateStream(async (track, _method, _queue) => {
+  const isYT = track.url && (track.url.includes('youtube.com') || track.url.includes('youtu.be'));
+  if (!isYT) return null;
+  try {
+    const args = [track.url, '-f', 'bestaudio[ext=webm]/bestaudio[ext=opus]/bestaudio', '--no-playlist', '-o', '-', '-q'];
+    if (HAS_COOKIES) args.push('--cookies', COOKIES_PATH);
+    const proc = spawn(YTDLP_BIN, args);
+    proc.stderr.on('data', d => { const m = d.toString().trim(); if (m) console.error('[ytdlp]', m); });
+    return proc.stdout;
+  } catch (err) {
+    console.error('[ytdlp stream]', err.message);
+    return null;
+  }
+});
 
 // Track the now-playing message per guild so we can edit it instead of spamming new ones
 const nowPlayingMessages = new Map();
