@@ -48,9 +48,10 @@ setClient(client);
 
   await player.extractors.register(YoutubeiExtractor, {
     cookie: youtubeCookie || undefined,
-    generateWithPoToken: !!youtubeCookie,
+    // [youtube-potoken] po_token helps bypass YouTube bot detection where available
+    generateWithPoToken: true,
   });
-  console.log(`🍪 YoutubeiExtractor: cookie=${!!youtubeCookie} poToken=${!!youtubeCookie}`);
+  console.log(`🍪 YoutubeiExtractor: cookie=${!!youtubeCookie} poToken=true`);
 
   // Spotify (ต้องการ CLIENT_ID + SECRET)
   if (process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET) {

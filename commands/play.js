@@ -1,4 +1,23 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { raw: ytdlpRaw } = require('youtube-dl-exec');
+const fs = require('fs');
+const path = require('path');
+
+const COOKIES_PATH = path.join(__dirname, '..', 'cookies.txt');
+const HAS_COOKIES = fs.existsSync(COOKIES_PATH);
+
+// [ytdlp-stream] Bypass YouTube bot detection by streaming via yt-dlp instead of youtubei
+function ytdlpStream(url) {
+  const opts = {
+    output: '-',
+    format: 'bestaudio[ext=webm]/bestaudio[ext=opus]/bestaudio',
+    noPlaylist: true,
+    quiet: true,
+  };
+  if (HAS_COOKIES) opts.cookies = COOKIES_PATH;
+  const proc = ytdlpRaw(url, opts);
+  return proc.stdout;
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -29,6 +48,17 @@ module.exports = {
         leaveOnEmptyCooldown: 5000,
         leaveOnEnd: true,
         leaveOnEndCooldown: 30000,
+        // [ytdlp-stream] Intercept YouTube streams — use yt-dlp to avoid datacenter IP blocks
+        onBeforeCreateStream: async (track, _method, _queue) => {
+          const isYT = track.url && (track.url.includes('youtube.com') || track.url.includes('youtu.be'));
+          if (!isYT) return null;
+          try {
+            return ytdlpStream(track.url);
+          } catch (err) {
+            console.error('[ytdlp stream]', err.message);
+            return null;
+          }
+        },
       },
     });
 
