@@ -1,21 +1,18 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { raw: ytdlpRaw } = require('youtube-dl-exec');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// [ytdlp-stream] Use Python yt-dlp binary for reliable YouTube streaming
+const YTDLP_BIN = process.env.YOUTUBE_DL_PATH || '/usr/local/bin/yt-dlp';
 const COOKIES_PATH = path.join(__dirname, '..', 'cookies.txt');
 const HAS_COOKIES = fs.existsSync(COOKIES_PATH);
 
-// [ytdlp-stream] Bypass YouTube bot detection by streaming via yt-dlp instead of youtubei
 function ytdlpStream(url) {
-  const opts = {
-    output: '-',
-    format: 'bestaudio[ext=webm]/bestaudio[ext=opus]/bestaudio',
-    noPlaylist: true,
-    quiet: true,
-  };
-  if (HAS_COOKIES) opts.cookies = COOKIES_PATH;
-  const proc = ytdlpRaw(url, opts);
+  const args = [url, '-f', 'bestaudio[ext=webm]/bestaudio[ext=opus]/bestaudio', '--no-playlist', '-o', '-', '-q'];
+  if (HAS_COOKIES) args.push('--cookies', COOKIES_PATH);
+  const proc = spawn(YTDLP_BIN, args);
+  proc.stderr.on('data', d => { const m = d.toString().trim(); if (m) console.error('[ytdlp]', m); });
   return proc.stdout;
 }
 
